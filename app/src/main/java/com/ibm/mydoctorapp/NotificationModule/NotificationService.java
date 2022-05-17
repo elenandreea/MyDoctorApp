@@ -33,12 +33,11 @@ public class NotificationService extends FirebaseMessagingService {
 
         if(message.getData().size()> 0) {
             String postID = message.getData().get("post_id");
-            String name = message.getData().get("name");
+            String patient = message.getData().get("patient");
             String category = message.getData().get("category");
-            addNotificationToDoctorDB(postID, name, category);
-            notifyTopicDoctor(postID, name, category);
+            addNotificationToDoctorDB(postID, patient, category);
+            notifyTopicDoctor(postID, patient, category);
         }
-
     }
 
     private void addNotificationToDoctorDB(String postID, String name, String category) {
