@@ -9,13 +9,11 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -27,31 +25,34 @@ import com.ibm.mydoctorapp.Models.Notification;
 import com.ibm.mydoctorapp.R;
 
 public class NotificationService extends FirebaseMessagingService {
+    private static final String TAG = "NoticeService";
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
 
         if(message.getData().size()> 0) {
-            String postID = message.getData().get("post_id");
             String patient = message.getData().get("patient");
+            String postID = message.getData().get("postID");
+            String userID = message.getData().get("userID");
             String category = message.getData().get("category");
-            addNotificationToDoctorDB(postID, patient, category);
-            notifyTopicDoctor(postID, patient, category);
+            addNotificationToDoctorDB(postID, userID, patient, category);
+            notifyTopicDoctor(patient, category);
         }
     }
 
-    private void addNotificationToDoctorDB(String postID, String name, String category) {
+    private void addNotificationToDoctorDB(String postID, String userID, String patient, String category) {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String uid = firebaseUser.getUid();
+        String currentUID = firebaseUser.getUid();
 
-        Notification notification = new Notification(name, category, postID);
+        Notification notification = new Notification(userID, patient, category, postID);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference("Notifications").child(uid).push();
+        DatabaseReference databaseReference = firebaseDatabase.getReference("Notifications").child(currentUID).push();
         databaseReference.setValue(notification);
     }
 
-    private void notifyTopicDoctor(String postID, String patient, String category) {
+    private void notifyTopicDoctor(String patient, String category) {
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -87,5 +88,14 @@ public class NotificationService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
+//        Log.d(TAG, "Refreshed token: " + token);
+        
+//        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+//        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+//        String currentUID = firebaseUser.getUid();
+//
+//        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+//        DatabaseReference databaseReference = firebaseDatabase.getReference("Tokens").child(currentUID);
+//        databaseReference.setValue(token);
     }
 }

@@ -56,7 +56,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 public void onClick(View v) {
                     Intent postDetailActivity = new Intent(mContext, PostDetailActivity.class);
                     int position = getAdapterPosition();
-                    postDetailActivity.putExtra("postID",mData.get(position).getPostID());
+                    postDetailActivity.putExtra("postID", mData.get(position).getPostID());
+                    postDetailActivity.putExtra("userID", mData.get(position).getUserID());
                     mContext.startActivity(postDetailActivity);
                 }
             });

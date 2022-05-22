@@ -51,6 +51,7 @@ public class PostDetailActivity extends AppCompatActivity {
     CommentAdapter commentAdapter;
     List<Comment> listComment;
     Post post;
+    String patientID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,8 @@ public class PostDetailActivity extends AppCompatActivity {
         firebaseUser = firebaseAuth.getCurrentUser();
         firebaseDatabase = FirebaseDatabase.getInstance();
 
+        patientID = getIntent().getExtras().getString("userID");
+
         btnAddComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,6 +89,7 @@ public class PostDetailActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         showMessage("comment added");
+//                        sendNotificationToPatient();
                         editTextComment.setText("");
                         btnAddComment.setVisibility(View.VISIBLE);
                     }
@@ -126,6 +130,10 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // ini Recyclerview Comment
         iniRvComment();
+
+    }
+
+    private void sendNotificationToPatient() {
 
     }
 
