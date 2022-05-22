@@ -1,16 +1,26 @@
 package com.ibm.mydoctorapp.Models;
 
 public class Notification {
+    private String userID;
     private String patientName;
     private String category;
     private String postID;
 
     public Notification() {}
 
-    public Notification(String patientName, String category, String postID) {
+    public Notification(String userID, String patientName, String category, String postID) {
+        this.userID = userID;
         this.patientName = patientName;
         this.category = category;
         this.postID = postID;
+    }
+
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public String getPatientName() {
