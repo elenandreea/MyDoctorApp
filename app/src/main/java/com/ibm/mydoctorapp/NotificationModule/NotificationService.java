@@ -6,26 +6,34 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.ibm.mydoctorapp.Activities.MainActivity;
+import com.ibm.mydoctorapp.Interfaces.LocationCallable;
 import com.ibm.mydoctorapp.Models.Notification;
+import com.ibm.mydoctorapp.Models.UserLocation;
 import com.ibm.mydoctorapp.R;
 
 public class NotificationService extends FirebaseMessagingService {
     private static final String TAG = "NoticeService";
+
+    FirebaseDatabase firebaseDatabase;
+    FirebaseUser currentUser;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
@@ -36,9 +44,43 @@ public class NotificationService extends FirebaseMessagingService {
             String postID = message.getData().get("postID");
             String userID = message.getData().get("userID");
             String category = message.getData().get("category");
-            addNotificationToDoctorDB(postID, userID, patient, category);
-            notifyTopicDoctor(patient, category);
+
+            firebaseDatabase = FirebaseDatabase.getInstance();
+            currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            getUserLocationCoordinates(userID, new LocationCallable() {
+                @Override
+                public void getUserLocation(UserLocation location1) {
+                    getUserLocationCoordinates(currentUser.getUid(), location2 -> {
+                        float[] distance = new float[1];
+                        Location.distanceBetween(location1.getLatitude(), location1.getLongitude(),
+                                location2.getLatitude(), location2.getLongitude(), distance);
+                        if (distance[0] < 30.0){
+                            addNotificationToDoctorDB(postID, userID, patient, category);
+                            notifyTopicDoctor(patient, category);
+                        }
+                    });
+                }
+            });
         }
+    }
+
+
+    private void getUserLocationCoordinates(String userID, LocationCallable locationCallable){
+        DatabaseReference reference = firebaseDatabase.getReference("Locations").child(userID);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    UserLocation location = snapshot.getValue(UserLocation.class);
+                    locationCallable.getUserLocation(location);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void addNotificationToDoctorDB(String postID, String userID, String patient, String category) {

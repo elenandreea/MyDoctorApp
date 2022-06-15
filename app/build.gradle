@@ -34,6 +34,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
 
+    //location services
+    implementation 'com.google.android.gms:play-services-location:20.0.0'
+    //firebase authentication
     implementation 'com.google.firebase:firebase-auth:19.3.0'
     //firebase core
     implementation 'com.google.firebase:firebase-core:20.1.2'
